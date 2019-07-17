@@ -1,6 +1,10 @@
 /* eslint-disable no-undef */
 
 const Product = React.createClass({
+  handleUpvote: function() {
+    this.props.onVote(this.props.id);
+  },
+
   render: function() {
     return (
       <div className="item">
@@ -9,7 +13,7 @@ const Product = React.createClass({
         </div>
         <div className="middle aligned content">
           <div className="header">
-            <a>
+            <a onClick={this.handleUpvote}>
               <i className="large caret up icon" />
             </a>
             {this.props.votes}
@@ -32,11 +36,43 @@ const Product = React.createClass({
 });
 
 const ProductList = React.createClass({
+  getInitialState: function() {
+    /*
+      Have an initial empty state so component can render first and then request
+      data in componendDidMount.
+    */
+    return {
+      products: []
+    };
+  },
+
+  componentDidMount: function() {
+    this.updateState();
+  },
+
+  updateState: function() {
+    const products = Data.sort((a, b) => {
+      return b.votes - a.votes;
+    });
+
+    this.setState({ products: products });
+  },
+
+  handleProductUpVote: function(productId) {
+    Data.forEach((product) => {
+      if (product.id === productId) {
+        product.votes = product.votes + 1;
+        return;
+      }
+    });
+    this.updateState();
+  },
+
   render: function() {
-    const products = Data.map(product => {
+    const products = this.state.products.map(product => {
       return (
         <Product
-          key={'product-' + product.id}
+          key={"product-" + product.id}
           id={product.id}
           title={product.title}
           description={product.description}
@@ -44,6 +80,7 @@ const ProductList = React.createClass({
           votes={product.votes}
           submitter_avatar_url={product.submitter_avatar_url}
           product_image_url={product.product_image_url}
+          onVote={this.handleProductUpVote}
         />
       );
     });
