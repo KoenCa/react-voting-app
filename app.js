@@ -3,11 +3,11 @@
 
 const Product = React.createClass({
   handleUpvote: function() {
-    this.props.onVote(this.props.id);
+    this.props.onVote(this.props.id, true);
   },
 
   handleDownVote: function() {
-    this.props.onDownVote(this.props.id);
+    this.props.onVote(this.props.id, false);
   },
 
   render: function() {
@@ -66,23 +66,17 @@ const ProductList = React.createClass({
     this.setState({ products: products });
   },
 
-  handleProductUpVote: function(productId) {
+  handleProductVote: function(productId, isUpvote) {
+    // First update the data (for example: API)
     Data.forEach(product => {
-      if (product.id === productId) {
+      if (product.id !== productId) return;
+      if (isUpvote)
         product.votes = product.votes + 1;
-        return;
-      }
-    });
-    this.updateState();
-  },
-
-  handleProductDownVote: function(productId) {
-    Data.forEach(product => {
-      if (product.id === productId) {
+      else
         product.votes = product.votes - 1;
-        return;
-      }
     });
+
+    // Then fetch the updated data and render it
     this.updateState();
   },
 
@@ -98,8 +92,7 @@ const ProductList = React.createClass({
           votes={product.votes}
           submitter_avatar_url={product.submitter_avatar_url}
           product_image_url={product.product_image_url}
-          onVote={this.handleProductUpVote}
-          onDownVote={this.handleProductDownVote}
+          onVote={this.handleProductVote}
         />
       );
     });
