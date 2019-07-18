@@ -1,8 +1,13 @@
 /* eslint-disable no-undef */
+// Pagina 50 van PDF
 
 const Product = React.createClass({
   handleUpvote: function() {
     this.props.onVote(this.props.id);
+  },
+
+  handleDownVote: function() {
+    this.props.onDownVote(this.props.id);
   },
 
   render: function() {
@@ -17,6 +22,9 @@ const Product = React.createClass({
               <i className="large caret up icon" />
             </a>
             {this.props.votes}
+            <a onClick={this.handleDownVote}>
+              <i className="large caret down icon" />
+            </a>
           </div>
           <div className="description">
             <a href={this.props.url}>{this.props.title}</a>
@@ -59,9 +67,19 @@ const ProductList = React.createClass({
   },
 
   handleProductUpVote: function(productId) {
-    Data.forEach((product) => {
+    Data.forEach(product => {
       if (product.id === productId) {
         product.votes = product.votes + 1;
+        return;
+      }
+    });
+    this.updateState();
+  },
+
+  handleProductDownVote: function(productId) {
+    Data.forEach(product => {
+      if (product.id === productId) {
+        product.votes = product.votes - 1;
         return;
       }
     });
@@ -81,6 +99,7 @@ const ProductList = React.createClass({
           submitter_avatar_url={product.submitter_avatar_url}
           product_image_url={product.product_image_url}
           onVote={this.handleProductUpVote}
+          onDownVote={this.handleProductDownVote}
         />
       );
     });
