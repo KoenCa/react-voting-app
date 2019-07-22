@@ -1,5 +1,18 @@
 /* eslint-disable no-undef */
-// Pagina 50 van PDF
+
+const SortButton = React.createClass({
+  handleClick: function() {
+    this.props.onToggleSortOrder();
+  },
+
+  render: function() {
+    return (
+      <button onClick={this.handleClick} className="ui button">
+        Toggle sort
+      </button>
+    );
+  }
+});
 
 const Product = React.createClass({
   handleUpvote: function() {
@@ -50,17 +63,22 @@ const ProductList = React.createClass({
       data in componendDidMount.
     */
     return {
-      products: []
+      products: [],
+      sortOrder: "DESC" // Can be ASC or DESC
     };
   },
 
   componentDidMount: function() {
-    this.updateState();
+    this.fetchSortedProducts();
   },
 
-  updateState: function() {
+  fetchSortedProducts: function() {
     const products = Data.sort((a, b) => {
-      return b.votes - a.votes;
+      if (this.state.sortOrder === "DESC") {
+        return b.votes - a.votes;
+      } else {
+        return a.votes - b.votes;
+      }
     });
 
     this.setState({ products: products });
@@ -70,14 +88,18 @@ const ProductList = React.createClass({
     // First update the data (for example: API)
     Data.forEach(product => {
       if (product.id !== productId) return;
-      if (isUpvote)
-        product.votes = product.votes + 1;
-      else
-        product.votes = product.votes - 1;
+      if (isUpvote) product.votes = product.votes + 1;
+      else product.votes = product.votes - 1;
     });
 
     // Then fetch the updated data and render it
-    this.updateState();
+    this.fetchSortedProducts();
+  },
+
+  toggleSortOrder: function() {
+    const currentSortOrder = this.state.sortOrder;
+    const newSortOrder = currentSortOrder === "ASC" ? "DESC" : "ASC";
+    this.setState({ sortOrder: newSortOrder }, this.fetchSortedProducts);
   },
 
   render: function() {
@@ -96,7 +118,12 @@ const ProductList = React.createClass({
         />
       );
     });
-    return <div className="ui items">{products}</div>;
+    return (
+      <div className="ui items">
+        <SortButton onToggleSortOrder={this.toggleSortOrder} />
+        {products}
+      </div>
+    );
   }
 });
 
